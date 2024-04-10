@@ -102,15 +102,15 @@ app.delete("/users/:id", (req, res) => {
   res.send(); 
 });
 
-
+// note: if name is found, but job isn't the findUserByName will run.
 const findUserByNameAndJob = (name, job) => {
-  return users["users_list"].filter(((user) => user["name"] === name) & ((user) => user["job"] === job));
+  return users["users_list"].filter(((user) => user["name"] === name) && ((user) => user["job"] === job));
 };
 
 app.get("/users", (req, res) => {
   const name = req.query.name;
   const job = req.query.job;
-  if ((name != undefined) & (job != undefined)) {
+  if ((name != undefined) && (job != undefined)) {
     let result = findUserByNameAndJob(name, job);
     result = { users_list: result };
     res.send(result);
