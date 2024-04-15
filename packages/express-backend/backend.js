@@ -1,9 +1,11 @@
 // backend.js
 import express from "express";
+import cors from "cors"
 
 const app = express();
 const port = 8000;
 
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -53,6 +55,25 @@ const findUserByName = (name) => {
   );
 };
 
+const findUserById = (id) =>
+  users["users_list"].find((user) => user["id"] === id);
+
+
+const addUser = (user) => {
+  users["users_list"].push(user);
+  return user;
+};
+
+const hardDeleteUserById = (id) => {
+  //filter out everyhting that's not equal to id
+  users["users_list"] = users["users_list"].filter(user => user["id"] !== id);
+};
+
+// note: if name is found, but job isn't the findUserByName will run.
+const findUserByNameAndJob = (name, job) => {
+  return users["users_list"].filter(((user) => user["name"] === name) && ((user) => user["job"] === job));
+};
+
 app.get("/users", (req, res) => {
   const name = req.query.name;
   if (name != undefined) {
@@ -64,11 +85,6 @@ app.get("/users", (req, res) => {
   }
 });
 
-
-
-const findUserById = (id) =>
-  users["users_list"].find((user) => user["id"] === id);
-
 app.get("/users/:id", (req, res) => {
   const id = req.params["id"]; //or req.params.id
   let result = findUserById(id);
@@ -79,33 +95,17 @@ app.get("/users/:id", (req, res) => {
   }
 });
 
-const addUser = (user) => {
-  users["users_list"].push(user);
-  return user;
-};
-
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
   addUser(userToAdd);
   res.send();
 });
 
-
-const hardDeleteUserById = (id) => {
-  //filter out everyhting that's not equal to id
-  users["users_list"] = users["users_list"].filter(user => user["id"] !== id);
-};
-
 app.delete("/users/:id", (req, res) => {
   const userIdToDelete = req.params.id;
   hardDeleteUserById(userIdToDelete);
   res.send(); 
 });
-
-// note: if name is found, but job isn't the findUserByName will run.
-const findUserByNameAndJob = (name, job) => {
-  return users["users_list"].filter(((user) => user["name"] === name) && ((user) => user["job"] === job));
-};
 
 app.get("/users", (req, res) => {
   const name = req.query.name;
