@@ -1,4 +1,3 @@
-
 // backend.js
 import express from "express";
 import cors from "cors"
@@ -49,7 +48,6 @@ const users = {
   ]
 };
 
-
 const findUserByName = (name) => {
   return users["users_list"].filter(
     (user) => user["name"] === name
@@ -67,7 +65,11 @@ const addUser = (user) => {
 
 const hardDeleteUserById = (id) => {
   //filter out everyhting that's not equal to id
+  if(!findUserById(id)){
+    throw new Error("User not found"); 
+  }
   users["users_list"] = users["users_list"].filter(user => user["id"] !== id);
+  return 200;
 };
 
 // note: if name is found, but job isn't the findUserByName will run.
@@ -96,16 +98,38 @@ app.get("/users/:id", (req, res) => {
   }
 });
 
+function generateID(length) {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const numbers = '0123456789';
+  let id = '';
+
+  for (let i = 0; i < 3; i++) {
+      id += letters.charAt(Math.floor(Math.random() * letters.length));
+  }
+
+  for (let i = 0; i < length - 3; i++) {
+      id += numbers.charAt(Math.floor(Math.random() * numbers.length));
+  }
+
+  return id;
+}
+// returning the newly created object from POST
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
+  const id = generateID(6);
+  req.body.id = id
   addUser(userToAdd);
-  res.send();
+  res.status(201).json(userToAdd);
 });
 
 app.delete("/users/:id", (req, res) => {
   const userIdToDelete = req.params.id;
-  hardDeleteUserById(userIdToDelete);
-  res.send(); 
+  const deleted = hardDeleteUserById(userIdToDelete);
+  if(deleted){
+    res.status(204).send('No Content Created'); 
+  }else{
+    res.status(404).send("Resource Not Found");
+  }
 });
 
 app.get("/users", (req, res) => {

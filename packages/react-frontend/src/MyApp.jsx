@@ -20,7 +20,7 @@ function MyApp() {
 
 
   function postUser(person) {
-    const promise = fetch("Http://localhost:8000/users", {
+    const promise = fetch("http://localhost:8000/users", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -30,32 +30,46 @@ function MyApp() {
 
     return promise;
   }
-
+  
   function updateList(person) { 
-    postUser(person)
-      .then(() => setCharacters([...characters, person]))
-      .catch((error) => {
-        console.log(error);
-      })
+        postUser(person)
+          .then((res)=> (res.status === 201?
+            res.json(): undefined)
+          )
+          //step 4?
+          .then((newUser) => {
+            if(newUser) setCharacters([...characters, newUser]);
+          }).catch((error) => {
+            console.log(error);
+          })
   }
-
-  function removeOneCharacter(index) {
-    const updated = characters.filter((character, i) => {
-      return i !== index;
-    });
-    setCharacters(updated);
+  function deleteUser(id) {
+      const promise = fetch(`http://localhost:8000/users/${id}`, {
+        method: "DELETE",
+      });
+    return promise;
   }
-  return (
-        <div className="container">
-            <Table
-            characterData={characters}
-            removeCharacter={removeOneCharacter}
-            />
-            <Form handleSubmit={updateList} />
-        </div>
+ function removeOneCharacter(id) {
+  deleteUser(id)
+    .then((res)=> {
+        if(res.status === 204){
+          setCharacters(characters.filter((user)=> user.id != id));
+        } 
+        else{
+          console.log("res.status")
+        }
+  }).catch((error) => {
+      console.log(error);
+  })
+}
+return(
+      <div className="container">
+          <Table
+          characterData={characters}
+          removeCharacter={removeOneCharacter}
+          />
+          <Form handleSubmit={updateList} />
+      </div>
   );
 }
 export default MyApp;
-
-
-
