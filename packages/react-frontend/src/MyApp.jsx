@@ -53,7 +53,7 @@ function MyApp() {
   deleteUser(id)
     .then((res)=> {
         if(res.status === 204){
-          setCharacters(characters.filter((user)=> user.id != id));
+          setCharacters(characters.filter((user)=> user._id !== id));
         } 
         else{
           console.log("res.status")
